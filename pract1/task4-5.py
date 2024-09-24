@@ -17,6 +17,9 @@ def eratosphere(N):
 def task4(N):
     if type(N) == int and N > 0:
          eratosphere(N)
+    elif type(N) == int and N < 0:
+        N = N * -1
+        eratosphere(N)
     elif type(N) == float:
         N = round(N)
         eratosphere(N)
@@ -25,21 +28,23 @@ def task4(N):
             if type(i) == int and i > 2:
                 eratosphere(i)
             else:
-                return "Ошибка, неверный ввод"
+                print("Ошибка, неверный ввод")
+                return 0
     else:
-         return "Ошибка, неверный ввод"
+         print("Ошибка, неверный ввод")
+         return 0
 
 def Test():
     t1 = 'jjgasllglsllaa'
-    print(task4(t1))
+    task4(t1)
     t2 = 10.999283421872
-    print(task4(t2))
+    task4(t2)
     t3 = True
-    print(task4(t3))
+    task4(t3)
     t4 = -10
-    print(task4(t4))
+    task4(t4)
     t5 = [10,11,15,2]
-    print(task4(t5))
+    task4(t5)
 
 Test()
         

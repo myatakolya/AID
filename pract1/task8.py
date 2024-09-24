@@ -1,7 +1,7 @@
-def fibbonachi(N):
+def fibbonachi():
     a = 0
     b = 1
-    for i in range(N):
+    while True:
         summa = a+b
         yield summa
         c = a
@@ -11,7 +11,7 @@ def fibbonachi(N):
 
 def indexer(digits):
     index = 0
-    fibbonachi_nums = fibbonachi(10000)
+    fibbonachi_nums = fibbonachi()
     for i in fibbonachi_nums:
         if len(str(i)) <= digits:
             index += 1

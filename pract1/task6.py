@@ -1,5 +1,5 @@
 #Функция в которой и будет проводится отбор комплексный чисел, но с немного хитрым решением))
-def answer(array:list):
+def answer():
     result = []
     for sublist in numbers:
         for num in sublist:
@@ -9,7 +9,7 @@ def answer(array:list):
     return(result)
 
 #Вторая функция, которую Вы скорее всего хотели бы видеть, но я не очень люблю решения в одну строчку
-def answer2(array:list):
+def answer2():
     result = tuple(num for sublist in numbers for num in sublist if isinstance(num, complex))
     return result
 

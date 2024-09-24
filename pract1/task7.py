@@ -1,7 +1,7 @@
 def fibbonachi(N):
     a = 0
     b = 1
-    for i in range(N):
+    for _ in range(N):
         summa = a+b
         yield summa
         c = a
