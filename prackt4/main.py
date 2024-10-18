@@ -1,75 +1,48 @@
-import numpy as np
+from time import time
+from math import pi, sin, cos
+from dsmltf import gradient_descent, minimize_stochastic
 import matplotlib.pyplot as plt
-import time
 
-def f(x, a1, a2, w1, w2, b):
-    return a1 * np.sin(w1 * x) + a2 * np.sin(w2 * x) + b
+# параметры
+k=2
+dt = 2*pi/1000
+x = [0,(-1)**k * dt]
+base = [2*pi*(i/500) for i in range(500)]
+omega=1000/k
+L=k/100
 
-def loss(params, x):
-    a1, a2, w1, w2, b = params
-    return np.sum((x - f(np.arange(len(x)), a1, a2, w1, w2, b))**2)
+def furie(k,a):
+    return a[0]+a[1]*cos(base[k]) + a[2]*sin(base[k])+a[3]*cos(2*base[k])+a[4]*sin(2*base[k])
 
-def gradient(params, x):
-    # Частные производные по параметрам
-    a1, a2, w1, w2, b = params
-    grad = np.zeros(5)
-    
-    # Вычисление градиентов
-    predictions = f(np.arange(len(x)), a1, a2, w1, w2, b)
-    error = predictions - x
-    
-    grad[0] = -2 * np.sum(error * np.sin(w1 * np.arange(len(x))))  # dL/da1
-    grad[1] = -2 * np.sum(error * np.sin(w2 * np.arange(len(x))))  # dL/da2
-    grad[2] = -2 * np.sum(error * a1 * np.arange(len(x)) * np.cos(w1 * np.arange(len(x))))  # dL/dw1
-    grad[3] = -2 * np.sum(error * a2 * np.arange(len(x)) * np.cos(w2 * np.arange(len(x))))  # dL/dw2
-    grad[4] = -2 * np.sum(error)  # dL/db
-    
-    return grad
+# функция ошибки для обычного градиентного спуска
+def F(a):
+    return sum([(x[j]-furie(j,a))**2 for j in range(500)])
 
-def gradient_descent(x, params_init, learning_rate=0.001, iterations=1000):
-    params = params_init
-    for _ in range(iterations):
-        params -= learning_rate * gradient(params, x)
-    return params
+# функция ошибки для стохатического градиентного спуска
+def f(i,a):
+    global x
+    return (x[i]-furie(i,a))**2
 
 
-def stochastic_gradient_descent(x, params_init, learning_rate=0.001, iterations=1000):
-    params = params_init
-    for _ in range(iterations):
-        idx = np.random.randint(len(x))
-        gradient_idx = gradient(params, x[idx:idx+1])
-        params -= learning_rate * gradient_idx
-    return params
 
-# Задание номера в журнале
-k = 13  # Замените на ваш номер
-L = k / 100
-omega = 1000 / k
-dt = 2 * np.pi / 1000
+for i in range(2,500):
+    x.append(x[i-1]*(2+dt*L*(1-x[i-2]**2))- x[i-2]*(1+dt**2+dt*L*(1-x[i-2]**2))+dt**2*sin(omega*dt))  
 
-# Генерация
-N = 500
-x = np.zeros(N)
-x[0] = 0
-x[1] = (-1) ** k * dt
+# вычисляем коэфициенты
+s_t_0 = time()
+a0 = gradient_descent(F,[0]*5)
+s_t_1 = time()
+a1 = minimize_stochastic(f,[i for i in range(500)],[0]*500,[0]*5)
+print(a0[0],a0[1])
+print(a1[0],a1[1])
+print(f"{s_t_1-s_t_0} секунд",f"{time()-s_t_1} секунд")
 
-for i in range(2, N):
-    x[i] = (x[i-1] * (2 + dt * L * (1 - x[i-2]**2)) 
-            - x[i-2] * (1 + dt**2 + dt * L * (1 - x[i-2]**2))
-            + dt**2 * np.sin(omega * i * dt))
-    
-# Начальные параметры
-params_init = np.random.rand(5)
-
-# Градиентный спуск
-start_time = time.time()
-result_gd = gradient_descent(x, params_init)
-gd_time = time.time() - start_time
-
-# Стохастический градиентный спуск
-start_time = time.time()
-result_sgd = stochastic_gradient_descent(x, params_init)
-sgd_time = time.time() - start_time
-
-print(f"Время градиентного спуска: {gd_time:.4f} секунд")
-print(f"Время стохастического градиентного спуска: {sgd_time:.4f} секунд")
+# рисуем графики
+plt.plot(base, x, label='Изначальная функция', linestyle='-', color='green')
+plt.plot(base, [furie(i,a0[0]) for i in range(500)], label=f'Градиентный спуск', linestyle='-.', color='red')
+plt.plot(base, [furie(i,a1[0]) for i in range(500)], label=f'Стохатичный градиентный спуск', linestyle='-.', color='blue')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.grid(True)
+plt.show()
